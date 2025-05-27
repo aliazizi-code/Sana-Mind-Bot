@@ -1,30 +1,27 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime
 from .base import Base
-from datetime import datetime 
+from utils.time_zone import get_iran_time
 
 
 class User(Base):
     __tablename__ = 'users'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    telegram_id = Column(Integer, unique=True, nullable=False)
+    telegram_id = Column(Integer, unique=True, nullable=False, index=True)
     full_name = Column(String, nullable=False)
-    username = Column(String, nullable=True)
-    is_admin = Column(Boolean, default=False, nullable=False)
-    is_active = Column(Boolean, default=True, nullable=False)
-    is_banned = Column(Boolean, default=False, nullable=False)
-    created_at = Column(DateTime, default=datetime.now, nullable=False)
+    username = Column(String, nullable=True, index=True)
+    is_admin = Column(Boolean, default=False, nullable=False, index=True)
+    is_active = Column(Boolean, default=True, nullable=False, index=True)
+    is_banned = Column(Boolean, default=False, nullable=False, index=True)
+    created_at = Column(DateTime, default=lambda: get_iran_time(), nullable=False)
     
     def __repr__(self):
-        return f"<User(id={self.id}, telegram_id={self.telegram_id}, full_name='{self.full_name}', username='{self.username}', is_admin={self.is_admin}, is_active={self.is_active}, is_banned={self.is_banned})>"
-
-    def __str__(self):
-        return f"User(telegram_id={self.telegram_id}, full_name={self.full_name})"
-    
-    def __init__(self, telegram_id, full_name: str, username=None, is_admin=False, is_active=True, is_banned=False):
-        self.telegram_id = telegram_id
-        self.full_name = full_name
-        self.username = username
-        self.is_admin = is_admin
-        self.is_active = is_active
-        self.is_banned = is_banned
+        return (
+            f"<User(id={self.id}, "
+            f"telegram_id={self.telegram_id}, "
+            f"full_name='{self.full_name}', "
+            f"username='{self.username}', "
+            f"is_admin={self.is_admin}, "
+            f"is_active={self.is_active}, "
+            f"is_banned={self.is_banned})> "
+        )
