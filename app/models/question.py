@@ -14,7 +14,7 @@ class Question(Base):
     options = relationship("Option", back_populates="question")
 
     def __repr__(self):
-        return f"<Question(id={self.id}, title='{self.title[:20]}...')>"
+        return f"<Question(id={self.id}, text='{self.text[:20]}...')>"
     
     @validates('text')
     def validate_text(self, key, text):
