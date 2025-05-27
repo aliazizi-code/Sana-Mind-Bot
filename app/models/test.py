@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text
 from sqlalchemy.orm import validates
 from enum import Enum
 from .base import Base
@@ -15,7 +15,7 @@ class Test(Base):
     
     id = Column(Integer, primary_key=True, autoincrement=True)
     title = Column(String(120), nullable=False)
-    description = Column(String(500), nullable=False)
+    description = Column(Text(500), nullable=False)
     is_active = Column(Boolean, default=True, nullable=False, index=True)
     test_type = Column(
         String(20), 
