@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import validates
-from .base import Base
+from db.base import Base
 
 
 class Question(Base):

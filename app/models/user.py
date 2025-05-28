@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime
-from .base import Base
+from db.base import Base
 from utils.time_zone import get_iran_time
 
 
