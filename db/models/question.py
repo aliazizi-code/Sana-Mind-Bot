@@ -10,6 +10,7 @@ class Question(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     test_id = Column(Integer, ForeignKey('tests.id'), nullable=False)
     text = Column(String(255), nullable=False)
+    order = Column(Integer)
     
     options = relationship("Option", back_populates="question")
 
