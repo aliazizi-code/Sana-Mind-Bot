@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text
-from sqlalchemy.orm import validates
+from sqlalchemy.orm import validates, relationship
 from enum import Enum
 from db.base import Base
 from utils.time_zone import get_iran_time
@@ -15,6 +15,7 @@ class Test(Base):
     
     id = Column(Integer, primary_key=True, autoincrement=True)
     title = Column(String(120), nullable=False)
+    key = Column(String, unique=True, nullable=False)
     description = Column(Text, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False, index=True)
     test_type = Column(
@@ -24,6 +25,13 @@ class Test(Base):
         index=True
     )
     created_at = Column(DateTime, default=lambda: get_iran_time(), nullable=False)
+    
+    questions = relationship(
+        "Question",
+        back_populates='test',
+        order_by='Question.order',
+        cascade='all, delete-orphan'
+    )
     
     def __repr__(self):
         return (
