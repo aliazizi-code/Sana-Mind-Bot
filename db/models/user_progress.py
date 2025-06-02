@@ -14,7 +14,7 @@ class UserProgress(Base):
     last_taken_date = Column(DateTime, default=lambda: get_iran_time())
     
     test = relationship("Test")
-    answer = relationship(
+    answers = relationship(
         "UserAnswer",
         back_populates='progress',
         cascade='all, delete-orphan'
