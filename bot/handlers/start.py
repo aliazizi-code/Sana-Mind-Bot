@@ -6,7 +6,7 @@ from db.models.user import User
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     db = SessionLocal()
-    msg = get_message_by_key(db, 'start')
+    msg = get_message_by_key(db, 'start', default="سلام. چقدر خودتو میشناسی؟")
     user = update.effective_user
     
     try:
