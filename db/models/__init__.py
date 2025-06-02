@@ -3,5 +3,6 @@ from .option import Option
 from .question import Question
 from .test import Test, TestType
 from .user_answer import UserAnswer
+from .user_progress import UserProgress
 from .user_result import UserResult
 from .message import Message
