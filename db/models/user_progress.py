@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from db.base import Base
-from utils.time_zone import get_iran_time
+from bot.utils.time_zone import get_iran_time
 
 
 class UserProgress(Base):
