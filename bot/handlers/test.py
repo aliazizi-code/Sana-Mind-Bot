@@ -1,4 +1,5 @@
 import logging
+from utils.logger_config import setup_logging
 from datetime import timedelta
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
@@ -392,7 +393,7 @@ async def show_result(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if result:
             logger.info(f"Result found - Result ID: {result.id}")
             await query.answer()
-            await query.edit_message_text(result.result_text)
+            await query.edit_message_text(result.result_text, parse_mode="Markdown")
             logger.debug("Result displayed to user")
         else:
             logger.info(f"No result yet for user {user_id} on test {test_id}")
