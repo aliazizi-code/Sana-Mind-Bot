@@ -176,7 +176,8 @@ cython_debug/
 
 *.rdb
 
-
+#Logs
+*.log/
 
 #IDE
 .idea
