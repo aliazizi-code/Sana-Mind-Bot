@@ -1,36 +1,17 @@
+from datetime import timedelta
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
-from db.crud.message import get_message_by_key
+from db.crud.user_exam_qa import get_user_exam_qa
 from db.models import Test, UserProgress, Question, Option, UserAnswer, User, UserResult
 from db.session import SessionLocal
-from datetime import datetime
-from utils.time_zone import get_iran_time
-from bot.message import test_menu_message, test_completion_message
-
-
-async def test_list(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    db = SessionLocal()
-    tests = db.query(Test).all()
-    
-    if not tests:
-        not_found_test_msg = get_message_by_key(
-            db, 'not_found_test',
-            default="هیچ تستی نیست بعدا بهمون سر بزن"
-        )
-        await update.message.reply_text(not_found_test_msg)
-        return
-    
-    keyboard = [
-        [InlineKeyboardButton(test.title, callback_data=f"show_test:{test.id}")]
-        for test in tests
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    
-    await update.message.reply_text(
-        test_menu_message,
-        reply_markup=reply_markup,
-        parse_mode="Markdown"
-    )
+from bot.utils.time_zone import get_iran_time
+from tasks.ai_analysis import get_ai_analysis
+from bot.bot_messages import (
+    test_completion_msg,
+    get_already_done_msg,
+    waiting_for_result_msg,
+    already_taken_no_limit_msg,
+)
 
 
 async def show_test(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -61,15 +42,18 @@ async def start_test(update: Update, context: ContextTypes.DEFAULT_TYPE):
     db = SessionLocal()
     user_id = db.query(User).filter_by(telegram_id=query.from_user.id).first().id
     
-    today = get_iran_time().date()
+    now = get_iran_time()
+    today = now.date()
     
     existing = db.query(UserProgress).filter_by(
         user_id=user_id, test_id=test_id
     ).first()
     
     if existing and existing.last_taken_date and existing.last_taken_date.date() == today:
+        next_time = existing.last_taken_date + timedelta(days=1)
+        remaining = next_time - now
         await query.answer(
-            text="شما امروز این آزمون را انجام داده‌اید.",
+            text=get_already_done_msg(remaining),
             show_alert=True
         )
         return
@@ -81,7 +65,7 @@ async def start_test(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await query.edit_message_text(
-            text="شما قبلا این آزمون را انجام داده‌اید آیا می‌خواهید دوباره انجام دهید؟",
+            text=already_taken_no_limit_msg,
             reply_markup=reply_markup
         )
         return
@@ -125,12 +109,23 @@ async def delete_test_progress(update: Update, context: ContextTypes.DEFAULT_TYP
 
 async def send_question(update: Update, context: ContextTypes.DEFAULT_TYPE, progress: UserProgress):
     db = SessionLocal()
+    test_id = progress.test_id
+    
+    test = db.query(Test).filter_by(id=test_id).first()
+    
     question = db.query(Question).filter_by(
-        test_id=progress.test_id, order=progress.current_order
+        test_id=test_id, order=progress.current_order
     ).first()
     
     if not question:
-        await update.callback_query.edit_message_text(test_completion_message, parse_mode="Markdown")
+        await update.callback_query.edit_message_text(test_completion_msg, parse_mode="Markdown")
+        
+        telegram_id = update.effective_user.id
+        qa_pairs = get_user_exam_qa(telegram_id, progress)
+        if qa_pairs in ["کاربر پیدا نشد ❌", "پیشرفت کاربر پیدا نشد ❌"]:
+            await update.callback_query.edit_message_text(qa_pairs)
+        else:
+            get_ai_analysis.delay(test.title, qa_pairs, telegram_id, test.id)
         return
     
     option = db.query(Option).filter_by(question_id=question.id).all()
@@ -175,7 +170,7 @@ async def handle_answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
     db.add(answer)
 
     progress.current_order += 1
-    progress.last_taken_date = datetime.utcnow()
+    progress.last_taken_date = get_iran_time()
     db.commit()
 
     await send_question(update, context, progress)
@@ -197,8 +192,6 @@ async def show_result(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text(result.result_text)
     else:
         await query.answer(
-            text=(
-                "نتیجه‌ای یافت نشد.\n"
-                "اگر آزمون را انجام داده‌اید لطفا منتظر باشید"),
+            text=waiting_for_result_msg,
             show_alert=True
         )
