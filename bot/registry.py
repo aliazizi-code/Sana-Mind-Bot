@@ -1,4 +1,5 @@
 import logging
+from utils.logger_config import setup_logging
 from bot.handlers.start import start
 from bot.handlers.manager import create_test_handler
 from bot.handlers.test import (

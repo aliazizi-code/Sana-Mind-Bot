@@ -1,5 +1,6 @@
 import os
 import logging
+from bot.utils.logger_config import setup_logging
 from dotenv import load_dotenv
 from telegram.ext import ApplicationBuilder
 from bot.registry import handlers

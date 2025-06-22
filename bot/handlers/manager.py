@@ -1,4 +1,5 @@
 import logging
+from utils.logger_config import setup_logging
 from telegram import Update
 from telegram.ext import ContextTypes, ConversationHandler, CommandHandler, MessageHandler, filters
 from bot.bot_messages import add_test_instruction, add_question_instruction

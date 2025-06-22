@@ -1,4 +1,5 @@
 import logging
+from bot.utils.logger_config import setup_logging
 from db.session import engine
 from db.base import Base
 from db.models import *

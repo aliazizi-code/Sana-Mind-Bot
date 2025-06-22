@@ -1,4 +1,5 @@
 import logging
+from utils.logger_config import setup_logging
 from telegram import Update, BotCommand
 from telegram.ext import ContextTypes
 from db.session import SessionLocal
