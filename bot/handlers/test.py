@@ -393,7 +393,13 @@ async def show_result(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if result:
             logger.info(f"Result found - Result ID: {result.id}")
             await query.answer()
-            await query.edit_message_text(result.result_text, parse_mode="Markdown")
+            chat_id = query.message.chat_id
+            await query.delete_message()
+            await context.bot.send_message(
+                chat_id=chat_id,
+                text=result.result_text,
+                parse_mode="Markdown",
+            )
             logger.debug("Result displayed to user")
         else:
             logger.info(f"No result yet for user {user_id} on test {test_id}")
