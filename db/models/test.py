@@ -1,13 +1,7 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text
+from sqlalchemy import Column, Integer, String, DateTime, Text
 from sqlalchemy.orm import validates, relationship
-from enum import Enum
 from db.base import Base
-from utils.time_zone import get_iran_time
-
-
-class TestType(Enum):
-    SINGLE_CHOICE = "single_choice"
-    MULTIPLE_CHOICE = "multiple_choice"
+from bot.utils.time_zone import get_iran_time
 
 
 class Test(Base):
@@ -15,15 +9,7 @@ class Test(Base):
     
     id = Column(Integer, primary_key=True, autoincrement=True)
     title = Column(String(120), nullable=False)
-    key = Column(String, unique=True, nullable=False)
     description = Column(Text, nullable=False)
-    is_active = Column(Boolean, default=True, nullable=False, index=True)
-    test_type = Column(
-        String(20), 
-        nullable=False, 
-        default=TestType.SINGLE_CHOICE.value,
-        index=True
-    )
     created_at = Column(DateTime, default=lambda: get_iran_time(), nullable=False)
     
     questions = relationship(
@@ -37,7 +23,6 @@ class Test(Base):
         return (
             f"<Test(id={self.id}, "
             f"title='{self.title}', "
-            f"type={self.test_type}, >"
         )
     
     @validates('title')
@@ -46,14 +31,8 @@ class Test(Base):
             raise ValueError("Title must be at least 3 characters long")
         return title
     
-    @validates('test_type')
-    def validate_test_type(self, key, test_type):
-        if test_type not in [t.value for t in TestType]:
-            raise ValueError(f"Invalid test type. Allowed values: {[t.value for t in TestType]}")
-        return test_type
-    
     @validates('description')
     def validate_description(self, key, description):
-        if description and len(description) > 500:
+        if description and len(description) > 1000:
             raise ValueError("Description cannot exceed 500 characters")
         return description
