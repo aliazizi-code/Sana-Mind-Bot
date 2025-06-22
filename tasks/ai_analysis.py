@@ -2,6 +2,7 @@ import os
 import requests
 import asyncio
 import logging
+from bot.utils.logger_config import setup_logging
 from telegram import Bot, InlineKeyboardButton, InlineKeyboardMarkup
 from dotenv import load_dotenv
 from AI.prompt import prompt
